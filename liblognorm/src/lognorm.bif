@@ -1,0 +1,31 @@
+
+module Liblognorm;
+
+const rule_file: string;
+
+%%{
+#include "LogNormalizer.h"
+
+using namespace plugin::Bro_Liblognorm;
+%%}
+
+function normalize%(s: string%) : bool
+    %{
+    LogNormalizer* ln = new LogNormalizer();
+
+    //TODO: Error handling
+    const char* rules_file = BifConst::Liblognorm::rule_file->CheckString();
+    ln->LoadRules(rules_file);
+    ln->Normalize(s->CheckString());
+
+    delete ln;
+    return new Val(true, TYPE_BOOL);
+    %}
+
+function generate_event%(s: string%) : bool
+    %{
+    char const* ev_name = s->CheckString();
+    LogNormalizer::GenerateEvent(ev_name);
+
+    return new Val(true, TYPE_BOOL);
+    %}

@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+
+plugin_usage()
+{
+    cat <<EOF
+    --with-liblognorm=DIR          Path to liblognorm
+    --with-libjson-c=DIR           Path to libJSON-C
+EOF
+}
+
+plugin_option()
+{
+    case "$1" in
+#        --with-foo=*)
+#            append_cache_entry FOO_DIR PATH $optarg
+#            return 0
+#            ;;
+
+        *)
+            return 1;
+            ;;
+    esac
+}
