@@ -59,11 +59,22 @@ bool LogNormalizer::Normalize(const char* line)
 
 		EventHandlerPtr evt = event_registry->Lookup(evt_name);
 		if ( ! evt )
-			return false;
+			{
+			reporter->Warning("No handler found for event triggered by lognorm: %s", evt_name);
+			continue;
+			}
 
-		mgr.QueueEvent(evt, vl);
+		// Create a separate parameter list for each event
+		val_list* evt_vl = new val_list;
+		loop_over_list(*vl, j)
+			evt_vl->append((*vl)[j]->Ref());
+		mgr.QueueEvent(evt, evt_vl);
 		}
 
+	// Consume initial reference
+	loop_over_list(*vl, i)
+		Unref((*vl)[i]);
+	delete vl;
 	return true;
 	}
 

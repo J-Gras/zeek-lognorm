@@ -2,7 +2,7 @@
 # @TEST-EXEC: btest-diff output
 
 #@TEST-START-FILE test.rulebase
-rule=test_event:Hello %who:word%
+rule=test_event,help:Hello %who:word%
 rule=test2_event:Bye %who:word%
 #@TEST-END-FILE
 
@@ -26,4 +26,9 @@ event test_event(s: string)
 event test2_event(s: string)
 	{
 	print fmt("Good bye to '%s'", s);
+	}
+
+event help(s: string)
+	{
+	print fmt("Why %s?", s);
 	}
