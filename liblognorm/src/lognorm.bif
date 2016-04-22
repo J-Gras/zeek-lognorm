@@ -1,20 +1,19 @@
 
-module Liblognorm;
+module Lognorm;
 
 const rule_file: string;
 
 %%{
 #include "LogNormalizer.h"
 
-using namespace plugin::Bro_Liblognorm;
+using namespace plugin::Bro_Lognorm;
 %%}
 
 function normalize%(s: string%) : bool
     %{
     LogNormalizer* ln = new LogNormalizer();
 
-    //TODO: Error handling
-    const char* rules_file = BifConst::Liblognorm::rule_file->CheckString();
+    const char* rules_file = BifConst::Lognorm::rule_file->CheckString();
     ln->LoadRules(rules_file);
     ln->Normalize(s->CheckString());
 

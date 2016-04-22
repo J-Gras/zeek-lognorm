@@ -7,7 +7,7 @@ extern "C" {
 #include <json-c/json.h>
 }
 
-using namespace plugin::Bro_Liblognorm;
+using namespace plugin::Bro_Lognorm;
 
 LogNormalizer::LogNormalizer()
 	{

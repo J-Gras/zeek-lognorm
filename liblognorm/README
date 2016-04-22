@@ -1,5 +1,5 @@
 
-Bro_Liblognorm::Lognorm
-=======================
+Bro::Lognorm
+============
 
 This plugin aims at integrating liblognorm into Bro and is under development.

@@ -1,14 +1,14 @@
 // See the file "COPYING" in the main distribution directory for copyright.
 
-#ifndef BRO_PLUGIN_BRO_LIBLOGNORM_LOGNORMALIZER_H
-#define BRO_PLUGIN_BRO_LIBLOGNORM_LOGNORMALIZER_H
+#ifndef BRO_PLUGIN_LOGNORM_LOGNORMALIZER_H
+#define BRO_PLUGIN_LOGNORM_LOGNORMALIZER_H
 
 extern "C" {
 #include <liblognorm.h>
 }
 
 namespace plugin {
-namespace Bro_Liblognorm {
+namespace Bro_Lognorm {
 
 class LogNormalizer {
 public:

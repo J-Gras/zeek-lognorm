@@ -6,7 +6,7 @@ rule=test_event:Hello %who:word%
 rule=test2_event:Bye %who:word%
 #@TEST-END-FILE
 
-module Liblognorm;
+module Lognorm;
 
 redef rule_file = "test.rulebase";
 

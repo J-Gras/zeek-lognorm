@@ -1,11 +1,11 @@
 
-#ifndef BRO_PLUGIN_BRO_LIBLOGNORM
-#define BRO_PLUGIN_BRO_LIBLOGNORM
+#ifndef BRO_PLUGIN_BRO_LOGNORM
+#define BRO_PLUGIN_BRO_LOGNORM
 
 #include <plugin/Plugin.h>
 
 namespace plugin {
-namespace Bro_Liblognorm {
+namespace Bro_Lognorm {
 
 class Plugin : public ::plugin::Plugin
 {

@@ -14,7 +14,7 @@ if ( LIBLOGNORM_FOUND AND LibJSON-C_FOUND )
 	message(STATUS "LibJSON-C header prefix  : ${LIBJSON_C_INCLUDE_DIR}")
 	message(STATUS "LibJSON-C library path   : ${LIBJSON_C_LIBRARY}")
 
-	bro_plugin_begin(Bro_Liblognorm Lognorm)
+	bro_plugin_begin(Bro Lognorm)
 	bro_plugin_cc(src/Plugin.cc)
 	bro_plugin_cc(src/LogNormalizer.cc)
 	bro_plugin_bif(src/lognorm.bif)
