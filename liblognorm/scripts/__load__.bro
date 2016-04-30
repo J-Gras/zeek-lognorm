@@ -8,6 +8,3 @@
 #
 
 @load ./init.bro
-
-
-

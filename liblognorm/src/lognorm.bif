@@ -1,30 +1,63 @@
 
 module Lognorm;
 
-const rule_file: string;
-
 %%{
 #include "LogNormalizer.h"
 
 using namespace plugin::Bro_Lognorm;
 %%}
 
-function normalize%(s: string%) : bool
+## Creates a log normalizer.
+##
+## Returns: A log normalizer handle.
+##
+## .. bro:see:: lognormalizer_normalize
+function lognormalizer_init%(%) : opaque of lognormalizer
     %{
-    LogNormalizer* ln = new LogNormalizer();
+    LogNormalizerVal* v = new LogNormalizerVal(
+        new LogNormalizer());
 
-    const char* rules_file = BifConst::Lognorm::rule_file->CheckString();
-    ln->LoadRules(rules_file);
-    ln->Normalize(s->CheckString());
-
-    delete ln;
-    return new Val(true, TYPE_BOOL);
+    return v;
     %}
 
-function generate_event%(s: string%) : bool
+## Loads a rule file in liblognorm format.
+##
+## ln: The lognormalizer handle.
+##
+## fn: The rule file name.
+##
+## Returns: A bool value indicating success.
+##
+## .. bro:see:: lognormalizer_init lognormalizer_normalize
+function lognormalizer_load_rules%(ln: opaque of lognormalizer,
+    fn: string%) : bool
     %{
-    char const* ev_name = s->CheckString();
-    LogNormalizer::GenerateEvent(ev_name);
+    LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
+    LogNormalizer* l = lnv->GetNormalizer();
+    if ( l )
+        {
+        bool succ = l->LoadRules(fn->CheckString());
+        return new Val(succ, TYPE_BOOL);
+        }
+    return new Val(false, TYPE_BOOL);
+    %}
 
-    return new Val(true, TYPE_BOOL);
+## Normalizes a log line. For each tag the matching rule defines,
+## the corresponding event will be scheduled. Each field the rule
+## defines, will be passed as parameter to the event.
+##
+## ln: The lognormalizer handle.
+##
+## s: The log line to normalize.
+##
+## Returns: A bool value indicating success.
+##
+## .. bro:see:: lognormalizer_init lognormalizer_load_rules
+function lognormalizer_normalize%(ln: opaque of lognormalizer,
+    s: string%): bool
+    %{
+    LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
+    LogNormalizer* l = lnv->GetNormalizer();
+    bool succ = l->Normalize(s->CheckString());
+    return new Val(succ, TYPE_BOOL);
     %}

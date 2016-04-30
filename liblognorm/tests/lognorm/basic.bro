@@ -6,9 +6,11 @@ rule=test_event,help:Hello %who:word%
 rule=test2_event:Bye %who:word%
 #@TEST-END-FILE
 
+@load Bro/Lognorm
+
 module Lognorm;
 
-redef rule_file = "test.rulebase";
+redef rule_files += {"test.rulebase"};
 
 event bro_init() 
 	{

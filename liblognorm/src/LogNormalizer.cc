@@ -9,6 +9,8 @@ extern "C" {
 
 using namespace plugin::Bro_Lognorm;
 
+static OpaqueType* lognormalizer_type = new OpaqueType("lognormalizer");
+
 LogNormalizer::LogNormalizer()
 	{
 	ctx = ln_initCtx();
@@ -80,21 +82,17 @@ bool LogNormalizer::Normalize(const char* line)
 	return true;
 	}
 
-void LogNormalizer::GenerateEvent(const char* name)
+LogNormalizerVal::LogNormalizerVal(LogNormalizer* ln) : OpaqueVal(lognormalizer_type)
 	{
-	printf("Hello Bro world!\n");
+	normalizer = ln;
+	}
 
-	EventHandlerPtr e = event_registry->Lookup(name);
+LogNormalizerVal::~LogNormalizerVal()
+	{
+	delete normalizer;
+	}
 
-	if ( e )
-		{
-		val_list* vl = new val_list;
-		vl->append(new StringVal("Hello event world!"));
-
-		mgr.QueueEvent(e, vl);
-		}
-	else
-		{
-		printf("Event not found!\n");
-		}
+LogNormalizer* LogNormalizerVal::GetNormalizer() const
+	{
+	return normalizer;
 	}
