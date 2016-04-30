@@ -75,6 +75,8 @@ bool LogNormalizer::Normalize(const char* line)
 	loop_over_list(*vl, i)
 		Unref((*vl)[i]);
 	delete vl;
+
+	json_object_put(json);
 	return true;
 	}
 
