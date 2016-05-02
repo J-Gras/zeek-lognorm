@@ -10,7 +10,7 @@ using namespace plugin::Bro_Lognorm;
 
 static OpaqueType* lognormalizer_type = new OpaqueType("lognormalizer");
 
-LogNormalizer::LogNormalizer()
+LogNormalizer::LogNormalizer(EventHandlerPtr evt_unparsed) : evt_unparsed(evt_unparsed)
 	{
 	ctx = ln_initCtx();
 	}
@@ -33,8 +33,15 @@ bool LogNormalizer::Normalize(const char* line)
 		return false;
 
 	if ( json_object_object_get_ex(json, "unparsed-data", NULL) )
-		//TODO: Allow to handle unparsed lines
+		{
+		if ( evt_unparsed )
+			{
+			val_list* args = new val_list;
+			args->append(new StringVal(line));
+			mgr.QueueEvent(evt_unparsed, args);
+			}
 		return false;
+		}
 
 	json_object* tags = NULL;
 	json_object_iter it;

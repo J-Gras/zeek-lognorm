@@ -14,17 +14,23 @@ export {
 	## Each field the rule defines, will be passed as parameter
 	## to the event.
 	##
-	## ln: The log line to normalize.
+	## line: The log line to normalize.
 	##
 	## Returns: T on success.
 	global normalize: function(line: string): bool;
+
+	## Event that is raised in case there is no matching rule for
+	## a given log line.
+	##
+	## line: The unparsed log line.
+	global unparsed_line: event(line: string);
 }
 
 global default_normalizer: opaque of lognormalizer;
 
 event bro_init() &priority=5
 	{
-	default_normalizer = lognormalizer_init();
+	default_normalizer = lognormalizer_init_ex(unparsed_line);
 
 	for ( rf in rule_files )
 		{

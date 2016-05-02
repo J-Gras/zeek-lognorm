@@ -43,3 +43,8 @@ event help(who: string, me: int)
 	{
 	print fmt("Why %s?", who);
 	}
+
+event unparsed_line(line: string)
+	{
+	print fmt("No rule for: '%s'", line);
+	}

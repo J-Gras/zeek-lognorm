@@ -5,6 +5,35 @@ module Lognorm;
 #include "LogNormalizer.h"
 
 using namespace plugin::Bro_Lognorm;
+
+static EventHandlerPtr to_event(Val* evt_val)
+    {
+    Func* evt = evt_val ? evt_val->AsFunc() : NULL;
+
+    if ( evt )
+        {
+        // Make sure the event is prototyped as expected
+        FuncType* evt_type = evt->FType()->AsFuncType();
+        if ( evt_type->Flavor() != FUNC_FLAVOR_EVENT )
+            {
+            reporter->Error("event is a function, not an event");
+            return NULL;
+            }
+
+        const RecordType* evt_args = evt_type->Args();
+        if ( (evt_args->NumFields() != 1) ||
+             (! IsString(evt_args->FieldType(0)->Tag())) )
+            {
+            reporter->Error("event must take a single argument of type string");
+            return NULL;
+            }
+
+        return event_registry->Lookup(evt->Name());
+        }
+
+    return NULL;
+    }
+
 %%}
 
 ## Creates a log normalizer.
@@ -14,10 +43,23 @@ using namespace plugin::Bro_Lognorm;
 ## .. bro:see:: lognormalizer_normalize
 function lognormalizer_init%(%) : opaque of lognormalizer
     %{
-    LogNormalizerVal* v = new LogNormalizerVal(
-        new LogNormalizer());
+    return new LogNormalizerVal(new LogNormalizer());
+    %}
 
-    return v;
+## Creates a log normalizer that allows to handle unparsed log
+## lines using a custom event.
+##
+## evt: An event to handle unparsed log lines. The event receives
+##      a single argument of type string, containing the log line.
+##
+## Returns: A log normalizer handle.
+##
+## .. bro:see:: lognormalizer_normalize
+function lognormalizer_init_ex%(evt: any%) : opaque of lognormalizer
+    %{
+    LogNormalizer* ln = new LogNormalizer(to_event(evt));
+
+    return new LogNormalizerVal(ln);
     %}
 
 ## Loads a rule file in liblognorm format.

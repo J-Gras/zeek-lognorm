@@ -24,9 +24,11 @@ public:
 	/**
 	* Construct a LogNormalizer.
 	*
+	* @param evt_unparsed Event that is raised for unparsed log lines.
+	*
 	* @return A new LogNormalizer.
 	*/
-	LogNormalizer();
+	LogNormalizer(EventHandlerPtr evt_unparsed = NULL);
 	/**
 	* Destructor.
 	*/
@@ -51,6 +53,7 @@ public:
 	bool Normalize(const char* line);
 protected:
 	ln_ctx ctx;
+	EventHandlerPtr evt_unparsed;
 
 	/**
 	* Helper to parse a log field.
