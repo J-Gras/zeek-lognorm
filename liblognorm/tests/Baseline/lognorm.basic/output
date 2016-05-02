@@ -1,0 +1,19 @@
+Greetings to 'world'
+Why world?
+Greetings to 'Anna'
+Why Anna?
+Detected type 5 error
+No rule for: 'Crash me if you can!'
+Good bye to 'Anna'
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	reporter
+#open	2016-05-02-12-10-51
+#fields	ts	level	message	location
+#types	time	enum	string	string
+0.000000	Reporter::WARNING	Argument not defined by lognorm rule: help(me: int)	(empty)
+0.000000	Reporter::WARNING	Argument not defined by lognorm rule: help(me: int)	(empty)
+0.000000	Reporter::ERROR	Incompatible argument types for event and liblognorm rule. Expected typetest(num: string)	(empty)
+#close	2016-05-02-12-10-51

@@ -1,0 +1,6 @@
+Bro::Lognorm - Log file analyzing (in development) (dynamic, version 0.1)
+    [Function] Lognorm::lognormalizer_init
+    [Function] Lognorm::lognormalizer_init_ex
+    [Function] Lognorm::lognormalizer_load_rules
+    [Function] Lognorm::lognormalizer_normalize
+
