@@ -1,9 +1,11 @@
-# @TEST-EXEC: bro %INPUT >output
+# @TEST-EXEC: bro %INPUT > output
+# @TEST-EXEC: cat reporter.log >> output
 # @TEST-EXEC: btest-diff output
 
 #@TEST-START-FILE test.rulebase
-rule=test_event,help:Hello %who:word%
-rule=test2_event:Bye %who:word%
+rule=greeting,help:Hello %who:word%
+rule=farewell:Bye %who:word%
+rule=typetest:Type %num:rest%
 #@TEST-END-FILE
 
 @load Bro/Lognorm
@@ -17,20 +19,27 @@ event bro_init()
 	#generate_event("test_event");
 	normalize("Hello world");
 	normalize("Hello Anna");
+	normalize("Type not matching!");
+	normalize("Crash me if you can!");
 	normalize("Bye Anna");
 	}
 
-event test_event(s: string)
+event greeting(who: string)
 	{
-	print fmt("Greetings to '%s'", s);
+	print fmt("Greetings to '%s'", who);
 	}
 
-event test2_event(s: string)
+event farewell(who: string)
 	{
-	print fmt("Good bye to '%s'", s);
+	print fmt("Good bye to '%s'", who);
 	}
 
-event help(s: string)
+event typetest(num: count)
 	{
-	print fmt("Why %s?", s);
+	print fmt("Detected type %s", num);
+	}
+
+event help(who: string, me: int)
+	{
+	print fmt("Why %s?", who);
 	}

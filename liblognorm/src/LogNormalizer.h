@@ -4,6 +4,7 @@
 #define BRO_PLUGIN_LOGNORM_LOGNORMALIZER_H
 
 #include <Val.h>
+#include <EventRegistry.h>
 
 extern "C" {
 #include <liblognorm.h>
@@ -11,6 +12,9 @@ extern "C" {
 
 namespace plugin {
 namespace Bro_Lognorm {
+
+
+typedef std::map<string, Val*> FieldList;
 
 /**
 * This class provides an interface to a liblognorm context.
@@ -31,7 +35,7 @@ public:
 	/**
 	* Loads a rule file in liblognorm format.
 	*
-	* @param The rule file name.
+	* @param filename The rule file name.
 	*
 	* @return `true` on success.
 	*/
@@ -40,13 +44,32 @@ public:
 	* Executes log normalization for the given line by scheduling
 	* events based on the rule's tags.
 	*
-	* @param The log line to parse.
+	* @param line The log line to parse.
 	*
 	* @return `true` on success.
 	*/
 	bool Normalize(const char* line);
 protected:
 	ln_ctx ctx;
+
+	/**
+	* Helper to parse a log field.
+	*
+	* @param field The field to parse.
+	*
+	* @return A value representing the field content.
+	*/
+	Val* ParseField(json_object* field);
+	/**
+	* Helper to generate a list of arguments for the given event.
+	*
+	* @param evt The event handler to prepare.
+	*
+	* @param fields The fields to pass to the event.
+	*
+	* @return A value list of arguments for the given event handler.
+	*/
+	val_list* BuildArgs(EventHandlerPtr evt, const FieldList &fields);
 };
 
 //extern OpaqueType* lognormalizer_type;

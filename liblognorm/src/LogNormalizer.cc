@@ -1,7 +1,6 @@
 
 #include "LogNormalizer.h"
 #include <Event.h>
-#include <EventRegistry.h>
 
 extern "C" {
 #include <json-c/json.h>
@@ -30,26 +29,24 @@ bool LogNormalizer::Normalize(const char* line)
 	{
 	json_object* json = NULL;
 
-	int err = ln_normalize(ctx, line, strlen(line), &json);
-	if ( err != 0 )
+	if ( ln_normalize(ctx, line, strlen(line), &json) != 0 )
+		return false;
+
+	if ( json_object_object_get_ex(json, "unparsed-data", NULL) )
+		//TODO: Allow to handle unparsed lines
 		return false;
 
 	json_object* tags = NULL;
-	val_list* vl = new val_list;
 	json_object_iter it;
+	FieldList fields;
 	
 	// Retrieve tags and parameters
 	json_object_object_foreachC ( json, it )
 		{
 		if ( strcmp(it.key, "event.tags") == 0 )
-			{
 			tags = it.val;
-			}
 		else
-			{
-			const char* param_val = json_object_get_string(it.val);
-			vl->append(new StringVal(param_val));
-			}
+			fields[it.key] = ParseField(it.val);
 		}
 
 	// Generate events for each tag
@@ -67,19 +64,76 @@ bool LogNormalizer::Normalize(const char* line)
 			}
 
 		// Create a separate parameter list for each event
-		val_list* evt_vl = new val_list;
-		loop_over_list(*vl, j)
-			evt_vl->append((*vl)[j]->Ref());
-		mgr.QueueEvent(evt, evt_vl);
+		mgr.QueueEvent(evt, BuildArgs(evt, fields));
 		}
 
 	// Consume initial reference
-	loop_over_list(*vl, i)
-		Unref((*vl)[i]);
-	delete vl;
+	for ( auto &fld : fields )
+		Unref(fld.second);
 
 	json_object_put(json);
 	return true;
+	}
+
+Val* LogNormalizer::ParseField(json_object* field)
+	{
+	Val* field_val = NULL;
+	int field_type = json_object_get_type(field);
+
+	switch ( field_type ) {
+	case json_type_boolean:
+		field_val = new Val(json_object_get_boolean(field), TYPE_BOOL);
+		break;
+	case json_type_int:
+		field_val = new Val(json_object_get_int64(field), TYPE_INT);
+		break;
+	case json_type_double:
+		field_val = new Val(json_object_get_double(field), TYPE_DOUBLE);
+		break;
+	case json_type_string:
+		field_val = new StringVal(json_object_get_string(field));
+		break;
+	default:
+		field_val = new StringVal("Unsupported type: " + std::to_string(field_type));
+	}
+
+	return field_val;
+	}
+
+val_list* LogNormalizer::BuildArgs(EventHandlerPtr evt, const FieldList &fields)
+	{
+	val_list* args = new val_list;
+	RecordType* evt_args = evt->FType()->Args();
+
+	for ( int i = 0; i < evt_args->NumFields(); i++ )
+		{
+		FieldList::const_iterator fld = fields.find(evt_args->FieldName(i));
+		if ( fld != fields.end() )
+			{
+			if ( same_type(fld->second->Type(), evt_args->FieldType(i)) )
+				{
+				args->append(fld->second->Ref());
+				continue;
+				}
+			else
+				{
+				reporter->Error("Incompatible argument types for event and "
+					"liblognorm rule. Expected %s(%s: %s)",
+					evt->Name(), evt_args->FieldName(i),
+					type_name(fld->second->Type()->Tag()));
+				}
+			}
+		else
+			{
+			reporter->Warning("Argument not defined by lognorm rule: %s(%s: %s)",
+				evt->Name(), evt_args->FieldName(i),
+				type_name(evt_args->FieldType(i)->Tag()));
+			}
+		//TODO: Create value of requested type?
+		args->append(new Val());
+		}
+
+	return args;
 	}
 
 LogNormalizerVal::LogNormalizerVal(LogNormalizer* ln) : OpaqueVal(lognormalizer_type)
