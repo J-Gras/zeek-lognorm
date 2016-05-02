@@ -3,7 +3,7 @@
 # Variables used by this module, they can change the default behaviour and need
 # to be set before calling find_package:
 #
-#  LIBJSON_C_ROOT_DIR        Set this variable to the root directory of
+#  LIBJSON_C_INCLUDE_DIR     Set this variable to the root directory of
 #                            libjson-c if the module has problems finding
 #                            the proper path.
 #

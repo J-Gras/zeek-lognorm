@@ -12,10 +12,15 @@ EOF
 plugin_option()
 {
     case "$1" in
-#        --with-foo=*)
-#            append_cache_entry FOO_DIR PATH $optarg
-#            return 0
-#            ;;
+        --with-liblognorm=*)
+            append_cache_entry LIBLOGNORM_INCLUDE_DIR PATH $optarg
+            return 0
+            ;;
+
+        --with-libjson-c=*)
+            append_cache_entry LIBJSON_C_INCLUDE_DIR PATH $optarg
+            return 0
+            ;;
 
         *)
             return 1;
