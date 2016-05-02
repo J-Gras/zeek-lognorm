@@ -35,5 +35,6 @@ event bro_init() &priority=5
 
 function normalize(line: string): bool
 	{
-	return lognormalizer_normalize(default_normalizer, line);
+	return lognormalizer_normalize(default_normalizer,
+		gsub(line, /\x00/, ""));
 	}
