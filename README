@@ -7,16 +7,16 @@ This plugin aims at integrating liblognorm into Bro and is under development.
 Installation
 ------------
 
-The plugin is based on liblognorm_, which requires json-c_ (might change, see Notes
-section). Make sure both libraries are available including their headers, which are
-required to build this plugin. The following will then compile and install the
-Lognorm plugin alongside Bro, assuming it can find the headers in a standard location::
+The plugin is based on liblognorm_, which requires libfastjson_. Make sure both
+libraries are available including their headers, which are required to build this
+plugin. The following will then compile and install the Lognorm plugin alongside
+Bro, assuming it can find the headers in a standard location::
 
     # ./configure && make && make install
 
 If the headers are installed somewhere non-standard, add
 ``--with-liblognorm=<liblognorm-header-directory>`` respectively
-``--with-libjson-c=<libjson-c-header-directory>`` to the ``configure``
+``--with-libfastjson=<libfastjson-header-directory>`` to the ``configure``
 command. If everything built and installed correctly, you should see
 this::
 
@@ -40,13 +40,10 @@ Notes
 -----
 
  - The plugin is not well tested!
- - According to this `blog post`_, liblognorm will switch from libjson-c to libfastjson.
-   Once this transition is completed, the plugin will need to be adapted.
- - Currently liblognorm seems to provide every value as string. Thus there is no implicit
-   conversion to Bro types like ``count`` or ``double``.
+ - Currently liblognorm seems to provide every value as string. Thus there is no
+   implicit conversion to Bro types like ``count`` or ``double``.
  - The plugin does not support nested types (might be implemented on demand).
  - If you have any ideas or suggestions, feel free to reach out!
 
 .. _liblognorm: https://github.com/rsyslog/liblognorm
-.. _json-c: https://github.com/json-c/json-c
-.. _blog post: http://blog.gerhards.net/2015/12/rsyslog-and-liblognorm-will-switch-to.html
+.. _libfastjson: https://github.com/rsyslog/libfastjson

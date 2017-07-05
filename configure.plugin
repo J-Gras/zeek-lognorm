@@ -4,8 +4,8 @@
 plugin_usage()
 {
     cat <<EOF
-    --with-liblognorm=DIR          Path to liblognorm
-    --with-libjson-c=DIR           Path to libJSON-C
+    --with-liblognorm=DIR      Path to liblognorm
+    --with-libfastjson=DIR     Path to libfastjson
 EOF
 }
 
@@ -17,8 +17,8 @@ plugin_option()
             return 0
             ;;
 
-        --with-libjson-c=*)
-            append_cache_entry LIBJSON_C_INCLUDE_DIR PATH $optarg
+        --with-libfastjson=*)
+            append_cache_entry LIBFASTJSON_INCLUDE_DIR PATH $optarg
             return 0
             ;;
 

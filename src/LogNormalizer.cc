@@ -3,7 +3,7 @@
 #include <Event.h>
 
 extern "C" {
-#include <json-c/json.h>
+#include <json.h>
 }
 
 using namespace plugin::Bro_Lognorm;
@@ -32,6 +32,7 @@ bool LogNormalizer::Normalize(const char* line)
 	if ( ln_normalize(ctx, line, strlen(line), &json) != 0 )
 		return false;
 
+	// Raise an event for unparsed lines
 	if ( json_object_object_get_ex(json, "unparsed-data", NULL) )
 		{
 		if ( evt_unparsed )
@@ -43,17 +44,23 @@ bool LogNormalizer::Normalize(const char* line)
 		return false;
 		}
 
+	// Retrieve tags and parameters
 	json_object* tags = NULL;
-	json_object_iter it;
 	FieldList fields;
 	
-	// Retrieve tags and parameters
-	json_object_object_foreachC ( json, it )
+	json_object_iterator it = json_object_iter_begin(json);
+	json_object_iterator it_end = json_object_iter_end(json);
+	while ( !json_object_iter_equal(&it, &it_end) )
 		{
-		if ( strcmp(it.key, "event.tags") == 0 )
-			tags = it.val;
+		const char* key = json_object_iter_peek_name(&it);
+		json_object* val = json_object_iter_peek_value(&it);
+
+		if ( strcmp(key, "event.tags") == 0 )
+			tags = val;
 		else
-			fields[it.key] = ParseField(it.val);
+			fields[key] = ParseField(val);
+
+		json_object_iter_next(&it);
 		}
 
 	// Generate events for each tag
