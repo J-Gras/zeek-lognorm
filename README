@@ -21,7 +21,7 @@ command. If everything built and installed correctly, you should see
 this::
 
     # bro -N Bro::Lognorm
-	Bro::Lognorm - Log file analyzing (in development) (dynamic, version 0.1)
+	Bro::Lognorm - Log file analyzing (in development) (dynamic, version 0.2)
 
 Usage
 -----
