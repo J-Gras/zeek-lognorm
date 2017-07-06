@@ -5,7 +5,7 @@
 # @TEST-EXEC: echo "Bye all" >> test.log
 # @TEST-EXEC: sleep 2
 # @TEST-EXEC: cat broproc/reporter.log >> output
-# @TEST-EXEC: btest-diff output
+# @TEST-EXEC: TEST_DIFF_CANONIFIER="$TOOLS/diff-remove-abspath | $TOOLS/diff-remove-timestamps" btest-diff output
 
 #@TEST-START-FILE test.rulebase
 rule=greeting:Hello %who:word%
