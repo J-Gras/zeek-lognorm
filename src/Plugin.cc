@@ -11,6 +11,6 @@ plugin::Configuration Plugin::Configure()
 	config.name = "Bro::Lognorm";
 	config.description = "Log file analyzing (in development)";
 	config.version.major = 0;
-	config.version.minor = 2;
+	config.version.minor = 3;
 	return config;
 	}
