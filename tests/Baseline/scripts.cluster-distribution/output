@@ -1,0 +1,14 @@
+Received new rule: 'rule=greeting:Hello %who:word%'
+Received new rule: 'rule=farewell:Bye %who:word%'
+Greetings to 'Cluster' from manager-1
+Received new rule: 'rule=progress:Add %who:word%'
+Progress on 'manager-1'
+Good bye to 'Cluster' from manager-1
+Greetings to 'Cluster' from worker-1
+Received new rule: 'rule=progress:Add %who:word%'
+Progress on 'worker-1'
+Good bye to 'Cluster' from worker-1
+Greetings to 'Cluster' from worker-2
+Received new rule: 'rule=progress:Add %who:word%'
+Progress on 'worker-2'
+Good bye to 'Cluster' from worker-2

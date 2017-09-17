@@ -20,9 +20,14 @@ LogNormalizer::~LogNormalizer()
 	ln_exitCtx(ctx);
 	}
 
-bool LogNormalizer::LoadRules(const char* filename)
+bool LogNormalizer::LoadRuleFile(const char* filename)
 	{
 	return ln_loadSamples(ctx, filename) == 0;
+	}
+
+bool LogNormalizer::LoadRuleFromString(const char* str)
+	{
+	return ln_loadSamplesFromString(ctx, str) == 0;
 	}
 
 bool LogNormalizer::Normalize(const char* line)

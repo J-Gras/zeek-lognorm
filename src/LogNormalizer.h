@@ -41,7 +41,15 @@ public:
 	*
 	* @return `true` on success.
 	*/
-	bool LoadRules(const char* filename);
+	bool LoadRuleFile(const char* filename);
+	/**
+	* Loads a liblognorm rule (v2 only) from string.
+	*
+	* @param str The rule string.
+	*
+	* @return `true` on success.
+	*/
+	bool LoadRuleFromString(const char* filename);
 	/**
 	* Executes log normalization for the given line by scheduling
 	* events based on the rule's tags.

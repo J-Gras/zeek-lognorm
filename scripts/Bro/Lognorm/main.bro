@@ -28,14 +28,36 @@ export {
 
 global default_normalizer: opaque of lognormalizer;
 
+# Declarations for cluster support
+type Rule: record {
+	s: string;
+};
+
+global read_rule: event(desc: Input::EventDescription, tpe: Input::Event, rule: string);
+
 event bro_init() &priority=5
 	{
 	default_normalizer = lognormalizer_init_ex(unparsed_line);
 
 	for ( rf in rule_files )
 		{
-		if ( !lognormalizer_load_rules(default_normalizer, rf) )
-			Reporter::error(fmt("Failed to load LogNormalizer rule file '%s'.", rf));
+		if ( ! Cluster::is_enabled() )
+			{
+			# Load rule file directly if not in cluster mode
+			if ( !lognormalizer_load_rule_file(default_normalizer, rf) )
+				Reporter::error(fmt("Failed to load LogNormalizer rule file '%s'.", rf));
+			}
+		else if ( Cluster::local_node_type() == Cluster::MANAGER )
+			{
+			# Use input framework in cluster mode
+			Input::add_event([$source=rf,
+			                  $reader=Input::READER_RAW,
+			                  $mode=Input::STREAM,
+			                  $name=cat("lognorm-", rf),
+			                  $fields=Rule,
+			                  $ev=Lognorm::read_rule,
+			                  $want_record=F]);
+			}
 		}
 	}
 

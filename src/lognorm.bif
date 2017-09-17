@@ -71,14 +71,36 @@ function lognormalizer_init_ex%(evt: any%) : opaque of lognormalizer
 ## Returns: A bool value indicating success.
 ##
 ## .. bro:see:: lognormalizer_init lognormalizer_normalize
-function lognormalizer_load_rules%(ln: opaque of lognormalizer,
+function lognormalizer_load_rule_file%(ln: opaque of lognormalizer,
     fn: string%) : bool
     %{
     LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
     LogNormalizer* l = lnv->GetNormalizer();
     if ( l )
         {
-        bool succ = l->LoadRules(fn->CheckString());
+        bool succ = l->LoadRuleFile(fn->CheckString());
+        return new Val(succ, TYPE_BOOL);
+        }
+    return new Val(false, TYPE_BOOL);
+    %}
+
+## Loads a liblognorm rule (v2 only).
+##
+## ln: The lognormalizer handle.
+##
+## s: The rule to load.
+##
+## Returns: A bool value indicating success.
+##
+## .. bro:see:: lognormalizer_init lognormalizer_normalize
+function lognormalizer_load_rule%(ln: opaque of lognormalizer,
+    s: string%) : bool
+    %{
+    LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
+    LogNormalizer* l = lnv->GetNormalizer();
+    if ( l )
+        {
+        bool succ = l->LoadRuleFromString(s->CheckString());
         return new Val(succ, TYPE_BOOL);
         }
     return new Val(false, TYPE_BOOL);
