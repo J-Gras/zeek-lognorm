@@ -20,7 +20,7 @@ find_library(LIBLOGNORM_LIBRARY
 
 find_path(LIBLOGNORM_INCLUDE_DIR
     NAMES liblognorm.h
-    HINTS include
+    PATH_SUFFIXES liblognorm
 )
 
 include(FindPackageHandleStandardArgs)

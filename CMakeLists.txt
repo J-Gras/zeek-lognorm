@@ -14,6 +14,7 @@ if ( LIBLOGNORM_FOUND AND LIBFASTJSON_FOUND)
 	message(STATUS "LibFastJSON header prefix  : ${LIBFASTJSON_INCLUDE_DIR}")
 	message(STATUS "LibFastJSON library path   : ${LIBFASTJSON_LIBRARY}")
 
+	include_directories(${LIBLOGNORM_INCLUDE_DIR})
 	include_directories(${LIBFASTJSON_INCLUDE_DIR})
 
 	bro_plugin_begin(Bro Lognorm)
