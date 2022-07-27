@@ -1,16 +1,19 @@
 
 #include "LogNormalizer.h"
-#include <Event.h>
+#include <broker/data.hh>
+#include <zeek/Event.h>
+#include <zeek/EventRegistry.h>
 
 extern "C" {
 #include <json.h>
 }
 
-using namespace plugin::Bro_Lognorm;
+using namespace plugin::Zeek_Lognorm;
 
-static OpaqueType* lognormalizer_type = new OpaqueType("lognormalizer");
+static zeek::OpaqueTypePtr lognormalizer_type =
+	zeek::make_intrusive<zeek::OpaqueType>("lognormalizer");
 
-LogNormalizer::LogNormalizer(EventHandlerPtr evt_unparsed) : evt_unparsed(evt_unparsed)
+LogNormalizer::LogNormalizer(zeek::EventHandlerPtr evt_unparsed) : evt_unparsed(evt_unparsed)
 	{
 	ctx = ln_initCtx();
 	}
@@ -42,9 +45,9 @@ bool LogNormalizer::Normalize(const char* line)
 		{
 		if ( evt_unparsed )
 			{
-			val_list* args = new val_list;
-			args->append(new StringVal(line));
-			mgr.QueueEvent(evt_unparsed, args);
+			zeek::Args args;
+			args.emplace_back(zeek::make_intrusive<zeek::StringVal>(line));
+			zeek::event_mgr.Enqueue(evt_unparsed, std::move(args));
 			}
 		return false;
 		}
@@ -75,87 +78,92 @@ bool LogNormalizer::Normalize(const char* line)
 		json_object* tag = json_object_array_get_idx(tags, i);
 		const char* evt_name = json_object_get_string(tag);
 
-		EventHandlerPtr evt = event_registry->Lookup(evt_name);
+		zeek::EventHandlerPtr evt = zeek::event_registry->Lookup(evt_name);
 		if ( ! evt )
 			{
-			reporter->Warning("No handler found for event triggered by lognorm: %s", evt_name);
+			zeek::reporter->Warning("No handler found for event triggered by lognorm: %s", evt_name);
 			continue;
 			}
 
 		// Create a separate parameter list for each event
-		mgr.QueueEvent(evt, BuildArgs(evt, fields));
+		zeek::event_mgr.Enqueue(evt, BuildArgs(evt, fields));
 		}
 
-	// Consume initial reference
-	for ( auto &fld : fields )
-		Unref(fld.second);
+	//FIXME: Consume initial reference?
+	//for ( auto &fld : fields )
+	//	Unref(fld.second);
 
 	json_object_put(json);
 	return true;
 	}
 
-Val* LogNormalizer::ParseField(json_object* field)
+zeek::ValPtr LogNormalizer::ParseField(json_object* field)
 	{
-	Val* field_val = NULL;
+	zeek::ValPtr field_val = nullptr;
 	int field_type = json_object_get_type(field);
 
 	switch ( field_type ) {
 	case json_type_boolean:
-		field_val = new Val(json_object_get_boolean(field), TYPE_BOOL);
+		field_val = zeek::val_mgr->Bool(json_object_get_boolean(field));
 		break;
 	case json_type_int:
-		field_val = new Val(json_object_get_int64(field), TYPE_INT);
+		field_val = zeek::val_mgr->Int(json_object_get_int64(field));
 		break;
 	case json_type_double:
-		field_val = new Val(json_object_get_double(field), TYPE_DOUBLE);
+		field_val = zeek::make_intrusive<zeek::DoubleVal>(json_object_get_double(field));
 		break;
 	case json_type_string:
-		field_val = new StringVal(json_object_get_string(field));
+		field_val = zeek::make_intrusive<zeek::StringVal>(json_object_get_string(field));
 		break;
 	default:
-		field_val = new StringVal("Unsupported type: " + std::to_string(field_type));
+		field_val = zeek::make_intrusive<zeek::StringVal>("Unsupported type: " + std::to_string(field_type));
 	}
 
 	return field_val;
 	}
 
-val_list* LogNormalizer::BuildArgs(EventHandlerPtr evt, const FieldList &fields)
+zeek::Args LogNormalizer::BuildArgs(zeek::EventHandlerPtr evt, const FieldList &fields)
 	{
-	val_list* args = new val_list;
-	RecordType* evt_args = evt->FType()->Args();
+	zeek::Args args;
+	zeek::RecordTypePtr evt_args = evt->GetType()->Params();
 
 	for ( int i = 0; i < evt_args->NumFields(); i++ )
 		{
 		FieldList::const_iterator fld = fields.find(evt_args->FieldName(i));
 		if ( fld != fields.end() )
 			{
-			if ( same_type(fld->second->Type(), evt_args->FieldType(i)) )
+			if ( same_type(fld->second->GetType(), evt_args->GetFieldType(i)) )
 				{
-				args->append(fld->second->Ref());
+				args.emplace_back(fld->second);
 				continue;
 				}
 			else
 				{
-				reporter->Error("Incompatible argument types for event and "
+				zeek::reporter->Error("Incompatible argument types for event and "
 					"liblognorm rule. Expected %s(%s: %s)",
 					evt->Name(), evt_args->FieldName(i),
-					type_name(fld->second->Type()->Tag()));
+					type_name(fld->second->GetType()->Tag()));
 				}
 			}
 		else
 			{
-			reporter->Warning("Argument not defined by lognorm rule: %s(%s: %s)",
+			zeek::reporter->Warning("Argument not defined by lognorm rule: %s(%s: %s)",
 				evt->Name(), evt_args->FieldName(i),
-				type_name(evt_args->FieldType(i)->Tag()));
+				type_name(evt_args->GetFieldType(i)->Tag()));
 			}
-		//TODO: Create value of requested type?
-		args->append(new Val());
+		//FIXME: This will blow up. Create value of requested type?
+		args.emplace_back(zeek::val_mgr->Bool(false));
 		}
 
 	return args;
 	}
 
-LogNormalizerVal::LogNormalizerVal(LogNormalizer* ln) : OpaqueVal(lognormalizer_type)
+LogNormalizerVal::LogNormalizerVal() : zeek::OpaqueVal(lognormalizer_type)
+	{
+	normalizer = nullptr;
+	}
+
+LogNormalizerVal::LogNormalizerVal(LogNormalizer* ln) : zeek::OpaqueVal(lognormalizer_type)
 	{
 	normalizer = ln;
 	}
@@ -168,4 +176,19 @@ LogNormalizerVal::~LogNormalizerVal()
 LogNormalizer* LogNormalizerVal::GetNormalizer() const
 	{
 	return normalizer;
+	}
+
+IMPLEMENT_OPAQUE_VALUE(LogNormalizerVal)
+
+broker::expected<broker::data> LogNormalizerVal::DoSerialize() const
+	{
+	//TODO: Implement serialization.
+	broker::vector d;
+	return {std::move(d)};
+	}
+
+bool LogNormalizerVal::DoUnserialize(const broker::data& data)
+	{
+	//TODO: Implement serialization.
+	return false;
 	}

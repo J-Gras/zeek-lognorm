@@ -1,8 +1,0 @@
-[package]
-description = This plugin provides liblognorm integration for Bro.
-tags = bro plugin, liblognorm, syslog
-plugin_dir = build
-build_command = ./configure --bro-dist=%(bro_dist)s && make
-test_command = cd tests && btest -d
-depends =
-  bro >=2.5.0

@@ -1,16 +1,14 @@
-# @TEST-EXEC: bro -r $TRACES/syslog-single-udp.trace %INPUT > output
+# @TEST-EXEC: zeek -r $TRACES/syslog-single-udp.trace %INPUT > output
 # @TEST-EXEC: btest-diff output
 
 #@TEST-START-FILE test.rulebase
 rule=test_event:%date:date-rfc3164% %user:word% %msg:rest%
 #@TEST-END-FILE
 
-@load Bro/Lognorm
-@load Bro/Lognorm/read_syslog
+@load Lognorm
+@load Lognorm/read_syslog
 
-module Lognorm;
-
-redef rule_files += {"test.rulebase"};
+redef Lognorm::rule_files += {"test.rulebase"};
 
 event test_event(msg: string)
 	{

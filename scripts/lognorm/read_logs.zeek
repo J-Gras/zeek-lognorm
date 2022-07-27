@@ -21,7 +21,7 @@ event read_log(desc: Input::EventDescription, t: Input::Event,
 			desc$source));
 	}
 
-event bro_init() &priority=5
+event zeek_init() &priority=5
 	{
 	for ( lf in log_files )
 		{

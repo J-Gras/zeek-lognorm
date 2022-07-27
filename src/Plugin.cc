@@ -1,16 +1,17 @@
 
 #include "Plugin.h"
 
-namespace plugin { namespace Bro_Lognorm { Plugin plugin; } }
+namespace plugin::Zeek_Lognorm { Plugin plugin; }
 
-using namespace plugin::Bro_Lognorm;
+using namespace plugin::Zeek_Lognorm;
 
-plugin::Configuration Plugin::Configure()
+zeek::plugin::Configuration Plugin::Configure()
 	{
-	plugin::Configuration config;
-	config.name = "Bro::Lognorm";
-	config.description = "Log file analyzing (in development)";
-	config.version.major = 0;
-	config.version.minor = 3;
+	zeek::plugin::Configuration config;
+	config.name = "Zeek::Lognorm";
+	config.description = "Log file analyzing (experimental)";
+	config.version.major = 1;
+	config.version.minor = 0;
+	config.version.patch = 0;
 	return config;
 	}

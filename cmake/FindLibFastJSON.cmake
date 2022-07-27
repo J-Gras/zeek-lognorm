@@ -14,7 +14,7 @@
 #  LIBFASTJSON_INCLUDE_DIR    The location of libfastjson headers
 
 find_library(LIBFASTJSON_LIBRARY
-    NAMES libfastjson.so
+    NAMES libfastjson.so libfastjson.dylib
     HINTS lib64
 )
 

@@ -4,34 +4,35 @@ module Lognorm;
 %%{
 #include "LogNormalizer.h"
 
-using namespace plugin::Bro_Lognorm;
+using namespace plugin::Zeek_Lognorm;
+using namespace zeek;
 
 static EventHandlerPtr to_event(Val* evt_val)
     {
-    Func* evt = evt_val ? evt_val->AsFunc() : NULL;
+    auto evt = evt_val ? evt_val->AsFunc() : nullptr;
 
     if ( evt )
         {
         // Make sure the event is prototyped as expected
-        FuncType* evt_type = evt->FType()->AsFuncType();
+        auto evt_type = evt->GetType()->AsFuncType();
         if ( evt_type->Flavor() != FUNC_FLAVOR_EVENT )
             {
             reporter->Error("event is a function, not an event");
-            return NULL;
+            return nullptr;
             }
 
-        const RecordType* evt_args = evt_type->Args();
+        auto evt_args = evt_type->Params();
         if ( (evt_args->NumFields() != 1) ||
-             (! IsString(evt_args->FieldType(0)->Tag())) )
+             (! IsString(evt_args->GetFieldType(0)->Tag())) )
             {
             reporter->Error("event must take a single argument of type string");
-            return NULL;
+            return nullptr;
             }
 
         return event_registry->Lookup(evt->Name());
         }
 
-    return NULL;
+    return nullptr;
     }
 
 %%}
@@ -40,10 +41,10 @@ static EventHandlerPtr to_event(Val* evt_val)
 ##
 ## Returns: A log normalizer handle.
 ##
-## .. bro:see:: lognormalizer_normalize
+## .. zeek:see:: lognormalizer_normalize
 function lognormalizer_init%(%) : opaque of lognormalizer
     %{
-    return new LogNormalizerVal(new LogNormalizer());
+    return make_intrusive<LogNormalizerVal>(new LogNormalizer());
     %}
 
 ## Creates a log normalizer that allows to handle unparsed log
@@ -51,15 +52,17 @@ function lognormalizer_init%(%) : opaque of lognormalizer
 ##
 ## evt: An event to handle unparsed log lines. The event receives
 ##      a single argument of type string, containing the log line.
+##      This approach is used to accomodate distinct events when
+##      using multiple lognormalizers.
 ##
 ## Returns: A log normalizer handle.
 ##
-## .. bro:see:: lognormalizer_normalize
+## .. zeek:see:: lognormalizer_normalize
 function lognormalizer_init_ex%(evt: any%) : opaque of lognormalizer
     %{
-    LogNormalizer* ln = new LogNormalizer(to_event(evt));
+    auto* ln = new LogNormalizer(to_event(evt));
 
-    return new LogNormalizerVal(ln);
+    return make_intrusive<LogNormalizerVal>(ln);
     %}
 
 ## Loads a rule file in liblognorm format.
@@ -70,18 +73,18 @@ function lognormalizer_init_ex%(evt: any%) : opaque of lognormalizer
 ##
 ## Returns: A bool value indicating success.
 ##
-## .. bro:see:: lognormalizer_init lognormalizer_normalize
+## .. zeek:see:: lognormalizer_init lognormalizer_normalize
 function lognormalizer_load_rule_file%(ln: opaque of lognormalizer,
     fn: string%) : bool
     %{
-    LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
-    LogNormalizer* l = lnv->GetNormalizer();
+    auto* lnv = static_cast<LogNormalizerVal*>(ln);
+    auto* l = lnv->GetNormalizer();
     if ( l )
         {
         bool succ = l->LoadRuleFile(fn->CheckString());
-        return new Val(succ, TYPE_BOOL);
+        return val_mgr->Bool(succ);
         }
-    return new Val(false, TYPE_BOOL);
+    return val_mgr->Bool(false);
     %}
 
 ## Loads a liblognorm rule (v2 only).
@@ -92,18 +95,18 @@ function lognormalizer_load_rule_file%(ln: opaque of lognormalizer,
 ##
 ## Returns: A bool value indicating success.
 ##
-## .. bro:see:: lognormalizer_init lognormalizer_normalize
+## .. zeek:see:: lognormalizer_init lognormalizer_normalize
 function lognormalizer_load_rule%(ln: opaque of lognormalizer,
     s: string%) : bool
     %{
-    LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
-    LogNormalizer* l = lnv->GetNormalizer();
+    auto* lnv = static_cast<LogNormalizerVal*>(ln);
+    auto* l = lnv->GetNormalizer();
     if ( l )
         {
         bool succ = l->LoadRuleFromString(s->CheckString());
-        return new Val(succ, TYPE_BOOL);
+        return val_mgr->Bool(succ);
         }
-    return new Val(false, TYPE_BOOL);
+    return val_mgr->Bool(false);
     %}
 
 ## Normalizes a log line. For each tag the matching rule defines,
@@ -116,12 +119,12 @@ function lognormalizer_load_rule%(ln: opaque of lognormalizer,
 ##
 ## Returns: A bool value indicating success.
 ##
-## .. bro:see:: lognormalizer_init lognormalizer_load_rules
+## .. zeek:see:: lognormalizer_init lognormalizer_load_rules
 function lognormalizer_normalize%(ln: opaque of lognormalizer,
     s: string%): bool
     %{
     LogNormalizerVal* lnv = static_cast<LogNormalizerVal*>(ln);
     LogNormalizer* l = lnv->GetNormalizer();
     bool succ = l->Normalize(s->CheckString());
-    return new Val(succ, TYPE_BOOL);
+    return val_mgr->Bool(succ);
     %}

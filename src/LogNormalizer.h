@@ -1,20 +1,21 @@
 // See the file "COPYING" in the main distribution directory for copyright.
 
-#ifndef BRO_PLUGIN_LOGNORM_LOGNORMALIZER_H
-#define BRO_PLUGIN_LOGNORM_LOGNORMALIZER_H
+#ifndef ZEEK_PLUGIN_LOGNORM_LOGNORMALIZER_H
+#define ZEEK_PLUGIN_LOGNORM_LOGNORMALIZER_H
 
-#include <Val.h>
-#include <EventRegistry.h>
+#include <map>
+#include <zeek/EventHandler.h>
+#include <zeek/OpaqueVal.h>
+#include <zeek/Val.h>
 
 extern "C" {
 #include <liblognorm.h>
 }
 
-namespace plugin {
-namespace Bro_Lognorm {
+namespace plugin::Zeek_Lognorm {
 
 
-typedef std::map<string, Val*> FieldList;
+typedef std::map<std::string, zeek::ValPtr> FieldList;
 
 /**
 * This class provides an interface to a liblognorm context.
@@ -28,7 +29,7 @@ public:
 	*
 	* @return A new LogNormalizer.
 	*/
-	LogNormalizer(EventHandlerPtr evt_unparsed = NULL);
+	LogNormalizer(zeek::EventHandlerPtr evt_unparsed = NULL);
 	/**
 	* Destructor.
 	*/
@@ -61,7 +62,7 @@ public:
 	bool Normalize(const char* line);
 protected:
 	ln_ctx ctx;
-	EventHandlerPtr evt_unparsed;
+	zeek::EventHandlerPtr evt_unparsed;
 
 	/**
 	* Helper to parse a log field.
@@ -70,7 +71,7 @@ protected:
 	*
 	* @return A value representing the field content.
 	*/
-	Val* ParseField(json_object* field);
+	zeek::ValPtr ParseField(json_object* field);
 	/**
 	* Helper to generate a list of arguments for the given event.
 	*
@@ -78,9 +79,9 @@ protected:
 	*
 	* @param fields The fields to pass to the event.
 	*
-	* @return A value list of arguments for the given event handler.
+	* @return A list of arguments for the given event handler.
 	*/
-	val_list* BuildArgs(EventHandlerPtr evt, const FieldList &fields);
+	zeek::Args BuildArgs(zeek::EventHandlerPtr evt, const FieldList &fields);
 };
 
 //extern OpaqueType* lognormalizer_type;
@@ -88,7 +89,7 @@ protected:
 /**
 * This class defines an opaque value wrapping a LogNormalizer.
 */
-class LogNormalizerVal : public OpaqueVal {
+class LogNormalizerVal : public zeek::OpaqueVal {
 public:
 	/**
 	* Construct a LogNormalizerVal.
@@ -108,11 +109,13 @@ public:
 	* @return The wrapped LogNormalizer.
 	*/
 	LogNormalizer* GetNormalizer() const;
+protected:
+	LogNormalizerVal();
+	DECLARE_OPAQUE_VALUE(LogNormalizerVal)
 private:
 	LogNormalizer* normalizer;
 };
 
-}
 }
 
 #endif

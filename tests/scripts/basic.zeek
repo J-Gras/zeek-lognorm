@@ -1,4 +1,4 @@
-# @TEST-EXEC: bro %INPUT > output
+# @TEST-EXEC: ZEEK_ALLOW_INIT_ERRORS=T zeek %INPUT > output
 # @TEST-EXEC: cat reporter.log >> output
 # @TEST-EXEC: btest-diff output
 
@@ -8,20 +8,20 @@ rule=farewell:Bye %who:word%
 rule=typetest:Type %num:rest%
 #@TEST-END-FILE
 
-@load Bro/Lognorm
+@load lognorm
 
 module Lognorm;
 
 redef rule_files += {"test.rulebase"};
 
-event bro_init() 
+event zeek_init()
 	{
 	#generate_event("test_event");
 	normalize("Hello world");
-	normalize("Hello Anna");
+	normalize("Hello Annette");
 	normalize("Type not matching!");
 	normalize("Crash me if you can!");
-	normalize("Bye Anna");
+	normalize("Bye Annette");
 	}
 
 event greeting(who: string)

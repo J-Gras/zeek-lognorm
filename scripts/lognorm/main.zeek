@@ -35,7 +35,7 @@ type Rule: record {
 
 global read_rule: event(desc: Input::EventDescription, tpe: Input::Event, rule: string);
 
-event bro_init() &priority=5
+event zeek_init() &priority=5
 	{
 	default_normalizer = lognormalizer_init_ex(unparsed_line);
 

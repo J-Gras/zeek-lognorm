@@ -1,0 +1,10 @@
+[package]
+description = This plugin provides liblognorm integration for Zeek.
+tags = zeek plugin, liblognorm, syslog
+script_dir = scripts/lognorm
+plugin_dir = build/Zeek_Lognorm.tgz
+build_command = ./configure && make
+test_command = cd tests && btest -d
+depends =
+  zkg >=2.0
+  zeek >=4.0.0

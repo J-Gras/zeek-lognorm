@@ -1,22 +1,20 @@
 
-#ifndef BRO_PLUGIN_BRO_LOGNORM
-#define BRO_PLUGIN_BRO_LOGNORM
+#ifndef ZEEK_PLUGIN_ZEEK_LOGNORM
+#define ZEEK_PLUGIN_ZEEK_LOGNORM
 
-#include <plugin/Plugin.h>
+#include <zeek/plugin/Plugin.h>
 
-namespace plugin {
-namespace Bro_Lognorm {
+namespace plugin::Zeek_Lognorm {
 
-class Plugin : public ::plugin::Plugin
+class Plugin : public zeek::plugin::Plugin
 {
 protected:
 	// Overridden from plugin::Plugin.
-	virtual plugin::Configuration Configure();
+	zeek::plugin::Configuration Configure() override;
 };
 
 extern Plugin plugin;
 
-}
 }
 
 #endif

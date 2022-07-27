@@ -14,7 +14,7 @@
 #  LIBLOGNORM_INCLUDE_DIR    The location of liblognorm headers
 
 find_library(LIBLOGNORM_LIBRARY
-    NAMES liblognorm.so
+    NAMES liblognorm.so liblognorm.dylib
     HINTS lib64
 )
 
